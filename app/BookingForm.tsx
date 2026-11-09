@@ -1,14 +1,13 @@
 "use client";
 
+import Image from "next/image";
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Calendar from "./components/Calendar";
-import { brl, serviceById, services } from "../lib/services";
+import { braidPhotos } from "./components/braidPhotos";
+import { formatBrPhone, maskBrPhone, normalizeBrPhone } from "../lib/phone";
+import { jumboLabel, priceLabel, serviceById, services } from "../lib/services";
 import { site, whatsappLink } from "../lib/site";
-
-const groups = [
-  { id: "simples", title: "Sem jumbo" },
-  { id: "jumbo", title: "Com jumbo" },
-] as const;
 
 const MONTHS_AHEAD = 4;
 
@@ -25,8 +24,14 @@ async function fetchFreeDays() {
   return ((await response.json()) as { days: FreeDay[] }).days;
 }
 
-export default function BookingForm({ initialServiceId }: { initialServiceId?: string }) {
-  const [serviceId, setServiceId] = useState(initialServiceId && serviceById.has(initialServiceId) ? initialServiceId : "box");
+type Props = {
+  initialServiceId?: string;
+  /** true quando o aviso automático no WhatsApp da Maysa está configurado. */
+  autoNotify: boolean;
+};
+
+export default function BookingForm({ initialServiceId, autoNotify }: Props) {
+  const [serviceId, setServiceId] = useState(initialServiceId && serviceById.has(initialServiceId) ? initialServiceId : services[0].id);
   const [today, setToday] = useState("");
   const [cursor, setCursor] = useState({ year: 0, month: 0 });
   const [freeByDay, setFreeByDay] = useState<Record<string, number>>({});
@@ -36,9 +41,12 @@ export default function BookingForm({ initialServiceId }: { initialServiceId?: s
   const [timesLoading, setTimesLoading] = useState(false);
   const [time, setTime] = useState("");
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [phoneTouched, setPhoneTouched] = useState(false);
   const [note, setNote] = useState("");
   const [submitState, setSubmitState] = useState<"idle" | "sending" | "error">("idle");
   const [submitError, setSubmitError] = useState("");
+  const [done, setDone] = useState(false);
   const timesRequest = useRef(0);
 
   const applyDays = useCallback((days: FreeDay[], focusFirst: boolean) => {
@@ -88,11 +96,14 @@ export default function BookingForm({ initialServiceId }: { initialServiceId?: s
     }
   }
 
-  const selectedService = services.find((service) => service.id === serviceId) ?? services[0];
-  const ready = Boolean(date && time && name.trim());
+  const selectedService = serviceById.get(serviceId) ?? services[0];
+  const selectedJumbo = jumboLabel(selectedService);
+  const phoneDigits = normalizeBrPhone(phone);
+  const ready = Boolean(date && time && name.trim() && phoneDigits);
   const todayMonth = today ? Number(today.slice(0, 4)) * 12 + Number(today.slice(5, 7)) - 1 : 0;
   const cursorMonth = cursor.year * 12 + cursor.month;
   const hasAnyDay = Object.keys(freeByDay).length > 0;
+  const firstName = name.trim().split(/\s+/)[0] || "linda";
 
   const formattedDate = useMemo(
     () => (date ? new Intl.DateTimeFormat("pt-BR", { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${date}T12:00:00Z`)) : ""),
@@ -103,29 +114,29 @@ export default function BookingForm({ initialServiceId }: { initialServiceId?: s
     [date],
   );
 
-  async function sendRequest() {
-    if (!ready) return;
-    const message = [
-      `Olá, ${site.owner}! ✨ Gostaria de agendar um horário.`,
-      "",
-      `Nome: ${name.trim()}`,
-      `Trança: ${selectedService.title} (${selectedService.detail.toLowerCase()}) — ${brl(selectedService.price)}`,
-      `Data: ${formattedDate} (${weekday})`,
-      `Horário: ${time}`,
-      note.trim() ? `Observação: ${note.trim()}` : "",
-      "",
-      "Pode confirmar para mim?",
-    ].filter(Boolean).join("\n");
+  const clientMessage = [
+    `Olá, ${site.owner}! ✨ ${done ? "Acabei de agendar pelo site." : "Gostaria de agendar um horário."}`,
+    "",
+    `Nome: ${name.trim()}`,
+    `Trança: ${selectedService.title}${selectedJumbo ? ` (${selectedJumbo.toLowerCase()})` : ""} — ${priceLabel(selectedService)}`,
+    `Data: ${formattedDate} (${weekday})`,
+    `Horário: ${time}`,
+    note.trim() ? `Observação: ${note.trim()}` : "",
+    "",
+    done ? "Fico no aguardo da confirmação!" : "Pode confirmar para mim?",
+  ].filter(Boolean).join("\n");
 
+  async function sendRequest() {
+    if (!ready || !phoneDigits) return;
     setSubmitState("sending");
     setSubmitError("");
     try {
       const response = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.trim(), serviceId, date, time, note: note.trim() }),
+        body: JSON.stringify({ name: name.trim(), phone: phoneDigits, serviceId, date, time, note: note.trim() }),
       });
-      const result = (await response.json()) as { error?: string };
+      const result = (await response.json()) as { error?: string; autoNotify?: boolean };
       if (!response.ok) {
         if (response.status === 409) {
           // Alguém reservou antes: atualiza o calendário e os horários do dia.
@@ -135,11 +146,43 @@ export default function BookingForm({ initialServiceId }: { initialServiceId?: s
         }
         throw new Error(result.error ?? "Não foi possível salvar o pedido.");
       }
-      window.location.assign(whatsappLink(message));
+      if (result.autoNotify) {
+        // A Maysa já foi avisada automaticamente: mostra a confirmação aqui mesmo.
+        setDone(true);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else {
+        // Sem aviso automático configurado, a cliente leva o pedido para o WhatsApp.
+        window.location.assign(whatsappLink(clientMessage));
+      }
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : "Não foi possível salvar o pedido.");
       setSubmitState("error");
     }
+  }
+
+  const summary = (
+    <div className="summary-list">
+      <div><span>Trança</span><strong>{selectedService.title}</strong></div>
+      <div><span>Valor</span><strong>{priceLabel(selectedService)}</strong></div>
+      <div><span>Dia</span><strong>{date ? new Date(`${date}T12:00:00`).toLocaleDateString("pt-BR") : "Escolha um dia"}</strong></div>
+      <div><span>Horário</span><strong>{time || "Escolha um horário"}</strong></div>
+    </div>
+  );
+
+  if (done) {
+    return (
+      <div className="booking-done" role="status">
+        <span className="done-icon" aria-hidden="true">✓</span>
+        <p className="summary-kicker">PEDIDO ENVIADO</p>
+        <h3>Tudo certo, <em>{firstName}!</em></h3>
+        <p>Seu horário ficou reservado e a Maysa já recebeu o seu pedido no WhatsApp. Ela vai te chamar no <strong>{phoneDigits ? formatBrPhone(phoneDigits) : phone}</strong> para confirmar.</p>
+        {summary}
+        <div className="done-actions">
+          <a className="whatsapp-button" href={whatsappLink(clientMessage)} target="_blank" rel="noreferrer"><span aria-hidden="true">↗</span> Falar com a Maysa no WhatsApp</a>
+          <Link className="done-back" href="/">Voltar ao site</Link>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -147,27 +190,29 @@ export default function BookingForm({ initialServiceId }: { initialServiceId?: s
       <div className="booking-form">
         <div className="booking-step">
           <div className="step-heading"><span>01</span><div><small>TRANÇA</small><h3>Qual trança vamos fazer?</h3></div></div>
-          {groups.map((group) => (
-            <div className="service-group" key={group.id} role="radiogroup" aria-label={group.title}>
-              <p className="service-group-title">{group.title}</p>
-              <div className="service-picker">
-                {services.filter((service) => service.group === group.id).map((service) => (
-                  <button
-                    className={service.id === serviceId ? "service-option selected" : "service-option"}
-                    type="button"
-                    role="radio"
-                    aria-checked={service.id === serviceId}
-                    key={service.id}
-                    onClick={() => setServiceId(service.id)}
-                  >
+          <div className="service-picker" role="radiogroup" aria-label="Escolha a trança">
+            {services.map((service) => {
+              const jumbo = jumboLabel(service);
+              return (
+                <button
+                  className={service.id === serviceId ? "service-option selected" : "service-option"}
+                  type="button"
+                  role="radio"
+                  aria-checked={service.id === serviceId}
+                  key={service.id}
+                  onClick={() => setServiceId(service.id)}
+                >
+                  <Image className="service-thumb" src={braidPhotos[service.id].main} alt="" width={52} height={65} />
+                  <span>
                     <strong>{service.title}</strong>
-                    <em>{brl(service.price)}</em>
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
-          <p className="service-hint">Não achou o modelo que você quer? <a href={whatsappLink("Olá, Maysa! Quero fazer uma trança diferente da tabela. Segue a foto de referência:")} target="_blank" rel="noreferrer">Mande uma foto no WhatsApp</a> que a Maysa te passa o valor.</p>
+                    <em>{priceLabel(service)}</em>
+                    {jumbo && <small>{jumbo}</small>}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          <p className="service-hint">Quer um modelo diferente? <a href={whatsappLink("Olá, Maysa! Quero fazer uma trança diferente. Segue a foto de referência:")} target="_blank" rel="noreferrer">Mande uma foto no WhatsApp</a> que a Maysa te passa o valor.</p>
         </div>
 
         <div className="booking-step">
@@ -217,26 +262,39 @@ export default function BookingForm({ initialServiceId }: { initialServiceId?: s
         </div>
 
         <div className="booking-step">
-          <div className="step-heading"><span>03</span><div><small>SEUS DADOS</small><h3>Como podemos te chamar?</h3></div></div>
+          <div className="step-heading"><span>03</span><div><small>SEUS DADOS</small><h3>Como a Maysa fala com você?</h3></div></div>
           <label className="text-field"><span>Seu nome</span><input type="text" placeholder="Digite seu nome" value={name} onChange={(event) => setName(event.target.value)} maxLength={80} autoComplete="name" /></label>
+          <label className="text-field">
+            <span>Seu WhatsApp</span>
+            <input
+              type="tel"
+              inputMode="numeric"
+              placeholder="(31) 99999-9999"
+              value={phone}
+              onChange={(event) => setPhone(maskBrPhone(event.target.value))}
+              onBlur={() => setPhoneTouched(true)}
+              autoComplete="tel-national"
+              aria-invalid={phoneTouched && phone !== "" && !phoneDigits}
+            />
+            {phoneTouched && phone !== "" && !phoneDigits && <em className="field-hint">Confira o número com DDD, ex.: (31) 99999-9999.</em>}
+          </label>
           <label className="text-field"><span>Alguma observação? <i>opcional</i></span><textarea placeholder="Ex.: tamanho, cor do jumbo, referência de foto..." rows={3} value={note} onChange={(event) => setNote(event.target.value)} maxLength={500} /></label>
         </div>
       </div>
 
       <aside className="booking-summary" aria-label="Resumo do agendamento">
         <p className="summary-kicker">SEU AGENDAMENTO</p>
-        <h3>Quase tudo pronto,<br /><em>{name.trim() || "linda"}.</em></h3>
-        <div className="summary-list">
-          <div><span>Trança</span><strong>{selectedService.title}</strong></div>
-          <div><span>Valor</span><strong>{brl(selectedService.price)}</strong></div>
-          <div><span>Dia</span><strong>{date ? new Date(`${date}T12:00:00`).toLocaleDateString("pt-BR") : "Escolha um dia"}</strong></div>
-          <div><span>Horário</span><strong>{time || "Escolha um horário"}</strong></div>
-        </div>
+        <h3>Quase tudo pronto,<br /><em>{firstName}.</em></h3>
+        {summary}
         <button className="whatsapp-button" type="button" disabled={!ready || submitState === "sending"} onClick={sendRequest}>
-          <span aria-hidden="true">↗</span> {submitState === "sending" ? "Reservando seu horário..." : "Reservar e continuar no WhatsApp"}
+          <span aria-hidden="true">{autoNotify ? "✓" : "↗"}</span>{" "}
+          {submitState === "sending" ? "Reservando seu horário..." : autoNotify ? "Reservar meu horário" : "Reservar e continuar no WhatsApp"}
         </button>
         {submitError && <p className="booking-error" role="alert">{submitError}</p>}
-        <p className="confirmation-note"><span aria-hidden="true">✓</span> Seu horário fica reservado e a Maysa confirma tudo pelo WhatsApp.</p>
+        <p className="confirmation-note">
+          <span aria-hidden="true">✓</span>{" "}
+          {autoNotify ? "A Maysa recebe seu pedido na hora pelo WhatsApp e te chama para confirmar." : "Seu horário fica reservado e a Maysa confirma tudo pelo WhatsApp."}
+        </p>
         <p className="privacy-note">Seus dados são usados somente para organizar este atendimento.</p>
       </aside>
     </div>

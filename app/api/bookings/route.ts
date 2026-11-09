@@ -1,7 +1,10 @@
+import { after } from "next/server";
 import { getSql } from "../../../db";
 import { isSameOrigin } from "../../../lib/admin-auth";
 import { freeTimes } from "../../../lib/availability";
-import { serviceById } from "../../../lib/services";
+import { newBookingMessage, ownerNotifyConfigured, sendOwnerWhatsApp } from "../../../lib/notify";
+import { normalizeBrPhone } from "../../../lib/phone";
+import { priceLabel, serviceById } from "../../../lib/services";
 import { isValidDate, isValidTime } from "../../../lib/slots";
 
 export const dynamic = "force-dynamic";
@@ -22,15 +25,17 @@ export async function POST(request: Request) {
   if (!isSameOrigin(request)) return Response.json({ error: "Origem inválida." }, { status: 403 });
 
   try {
-    const payload = (await request.json()) as { name?: string; serviceId?: string; date?: string; time?: string; note?: string };
+    const payload = (await request.json()) as { name?: string; phone?: string; serviceId?: string; date?: string; time?: string; note?: string };
     const name = payload.name?.trim() ?? "";
+    const phone = normalizeBrPhone(payload.phone ?? "");
     const service = serviceById.get(payload.serviceId ?? "");
     const date = payload.date ?? "";
     const time = payload.time ?? "";
     const note = payload.note?.trim() ?? "";
 
     if (name.length < 2 || name.length > 80) return Response.json({ error: "Informe um nome válido." }, { status: 400 });
-    if (!service) return Response.json({ error: "Procedimento inválido." }, { status: 400 });
+    if (!phone) return Response.json({ error: "Informe um WhatsApp válido, com DDD." }, { status: 400 });
+    if (!service) return Response.json({ error: "Trança inválida." }, { status: 400 });
     if (!isValidDate(date)) return Response.json({ error: "Data inválida." }, { status: 400 });
     if (!isValidTime(time)) return Response.json({ error: "Horário inválido." }, { status: 400 });
     if (note.length > 500) return Response.json({ error: "A observação está muito longa." }, { status: 400 });
@@ -39,8 +44,8 @@ export async function POST(request: Request) {
     // O índice único (date, time) impede reservas duplicadas mesmo em requisições simultâneas.
     const sql = getSql();
     const rows = await sql`
-      insert into bookings (name, service_id, service_title, date, time, note)
-      select ${name}::text, ${service.id}::text, ${service.title}::text, ${date}::date, ${time}::text, ${note}::text
+      insert into bookings (name, phone, service_id, service_title, date, time, note)
+      select ${name}::text, ${phone}::text, ${service.id}::text, ${service.title}::text, ${date}::date, ${time}::text, ${note}::text
       where exists (
         select 1 from availability_slots s
         where s.date = ${date}::date and s.time = ${time}::text
@@ -52,7 +57,16 @@ export async function POST(request: Request) {
     if (rows.length === 0) {
       return Response.json({ error: "Este horário não está mais disponível. Escolha outro." }, { status: 409 });
     }
-    return Response.json({ id: rows[0].id }, { status: 201 });
+
+    // Avisa a Maysa no WhatsApp depois de responder à cliente (não atrasa nem derruba a reserva).
+    const autoNotify = ownerNotifyConfigured();
+    if (autoNotify) {
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
+      const text = newBookingMessage({ name, phone, serviceTitle: service.title, priceText: priceLabel(service), date, time, note, siteUrl });
+      after(() => sendOwnerWhatsApp(text).catch((error) => console.error("Aviso no WhatsApp da Maysa falhou:", error)));
+    }
+
+    return Response.json({ id: rows[0].id, autoNotify }, { status: 201 });
   } catch (error) {
     console.error("Unable to create booking", error);
     const message = error instanceof Error ? error.message : String(error);

@@ -34,4 +34,7 @@ export const schemaStatements = [
     primary key (date, time)
   )`,
   `create index if not exists idx_availability_slots_date on availability_slots (date)`,
+
+  // WhatsApp da cliente (para a Maysa responder o pedido).
+  `alter table bookings add column if not exists phone text not null default ''`,
 ];

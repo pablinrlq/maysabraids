@@ -10,7 +10,7 @@ export async function GET(request: Request) {
     if (!(await isAdminRequest(request))) return Response.json({ error: "Não autorizado." }, { status: 401 });
     const sql = getSql();
     const rows = await sql`
-      select id::int as id, name, service_id as "serviceId", service_title as "serviceTitle",
+      select id::int as id, name, phone, service_id as "serviceId", service_title as "serviceTitle",
              to_char(date, 'YYYY-MM-DD') as date, time, note, status
       from bookings
       order by date desc, time desc

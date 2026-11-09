@@ -1,11 +1,12 @@
 import Image, { type StaticImageData } from "next/image";
-import { brl, services } from "../lib/services";
+import { jumboLabel, priceLabel, services } from "../lib/services";
 import { instagramPost, site, whatsappLink } from "../lib/site";
 import WhatsAppIcon from "./components/WhatsAppIcon";
+import { braidPhotos } from "./components/braidPhotos";
 
 import retrato from "../assets/photos/maysa-retrato.jpg";
 import jornal from "../assets/photos/maysa-jornal.jpg";
-import jumbo from "../assets/photos/maysa-jumbo.jpg";
+import fotoJumbo from "../assets/photos/maysa-jumbo.jpg";
 import fogo from "../assets/photos/maysa-fogo.jpg";
 import experiencia from "../assets/photos/experiencia.jpg";
 import t01 from "../assets/photos/trabalho-01.jpg";
@@ -37,11 +38,6 @@ const gallery: Work[] = [
   { src: t11, alt: "Tranças nagô com baby hair, vistas de perfil", tag: "Perfil", code: "DV80T4qEWw5" },
   { src: t12, alt: "Tranças nagô longas vistas de perfil", tag: "Nagô longas", code: "DCcqh_NSvSM" },
 ];
-
-const groups = [
-  { id: "simples", title: "Sem jumbo", text: "Feitas com o seu próprio cabelo." },
-  { id: "jumbo", title: "Com jumbo", text: "Com cabelo sintético para volume e comprimento." },
-] as const;
 
 const marquee = ["TRANÇAS COM IDENTIDADE", "CUIDADO EM CADA DETALHE", "AUTOESTIMA EM PRIMEIRO LUGAR"];
 
@@ -117,31 +113,31 @@ export default function Home() {
       <section className="services section" id="valores">
         <div className="section-heading light">
           <div><p className="eyebrow">Tranças &amp; valores</p><h2>Escolha a sua<br /><em>trança.</em></h2></div>
-          <p>Toque na trança para agendar. Se nenhuma for exatamente o que você quer, é só mandar uma foto no WhatsApp que a Maysa te passa o valor.</p>
+          <p>Toque na trança para agendar. Se você quiser um modelo diferente, é só mandar uma foto no WhatsApp que a Maysa te passa o valor.</p>
         </div>
-        <div className="price-layout">
-          <figure className="price-photo">
-            <Image src={jumbo} alt="Maysa segurando mechas de jumbo cacheado" placeholder="blur" sizes="(max-width: 980px) 92vw, 330px" />
-            <figcaption>Jumbo é o cabelo sintético que dá volume e comprimento às tranças.</figcaption>
-          </figure>
-          <div className="price-grid">
-            {groups.map((group) => (
-              <article className="price-card" key={group.id}>
-                <header><h3>{group.title}</h3><p>{group.text}</p></header>
-                <ul>
-                  {services.filter((service) => service.group === group.id).map((service) => (
-                    <li key={service.id}>
-                      <a href={`/agendamento?servico=${service.id}`}>
-                        <span>{service.title}</span><i aria-hidden="true" /><strong>{brl(service.price)}</strong><b aria-hidden="true">→</b>
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </article>
-            ))}
-          </div>
+        <div className="braid-grid">
+          {services.map((service) => {
+            const photos = braidPhotos[service.id];
+            const jumbo = jumboLabel(service);
+            return (
+              <a className="braid-card" href={`/agendamento?servico=${service.id}`} key={service.id}>
+                <div className="braid-photo">
+                  <Image src={photos.main} alt={`${service.title} feita pela Maysa`} placeholder="blur" sizes="(max-width: 980px) 46vw, 280px" />
+                  {photos.extra && <Image className="braid-extra" src={photos.extra} alt={`Outro exemplo de ${service.title}`} sizes="120px" />}
+                </div>
+                <div className="braid-info">
+                  <h3>{service.title}</h3>
+                  {jumbo && <small>{jumbo}</small>}
+                  <p><strong>{priceLabel(service)}</strong><span>Agendar <b aria-hidden="true">→</b></span></p>
+                </div>
+              </a>
+            );
+          })}
+          <a className="braid-card braid-custom" href={whatsappLink("Olá, Maysa! Quero fazer uma trança diferente. Segue a foto de referência:")} target="_blank" rel="noreferrer">
+            <Image src={fotoJumbo} alt="Maysa segurando mechas de jumbo" fill placeholder="blur" sizes="(max-width: 980px) 46vw, 280px" />
+            <div><small>Outro modelo?</small><strong>Mande uma foto no WhatsApp</strong><span>A Maysa te passa o valor ↗</span></div>
+          </a>
         </div>
-        <p className="price-note">📸 Quer outro modelo? <a href={whatsappLink("Olá, Maysa! Quero fazer uma trança que não está na tabela. Segue a foto de referência:")} target="_blank" rel="noreferrer">Envie uma foto no WhatsApp ↗</a></p>
       </section>
 
       <section className="experience section">

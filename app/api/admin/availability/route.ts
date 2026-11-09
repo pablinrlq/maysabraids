@@ -30,7 +30,7 @@ export async function GET(request: Request) {
     const sql = getSql();
     const rows = await sql`
       select to_char(s.date, 'YYYY-MM-DD') as date, s.time,
-             b.id::int as "bookingId", b.name as "clientName", b.service_title as "serviceTitle", b.status
+             b.id::int as "bookingId", b.name as "clientName", b.phone as "clientPhone", b.service_title as "serviceTitle", b.status
       from availability_slots s
       left join bookings b on b.date = s.date and b.time = s.time and b.status <> 'cancelled'
       where s.date between ${from}::date and ${to}::date
