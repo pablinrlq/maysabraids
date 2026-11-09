@@ -123,7 +123,7 @@ export default function Home() {
               <a className="braid-card" href={`/agendamento?servico=${service.id}`} key={service.id}>
                 <div className="braid-photo">
                   <Image src={photos.main} alt={`${service.title} feita pela Maysa`} placeholder="blur" sizes="(max-width: 980px) 46vw, 280px" />
-                  {photos.extra && <Image className="braid-extra" src={photos.extra} alt={`Outro exemplo de ${service.title}`} sizes="120px" />}
+                  {photos.extra && <Image className="braid-extra" src={photos.extra} alt={`Outro exemplo de ${service.title}`} placeholder="blur" sizes="120px" />}
                 </div>
                 <div className="braid-info">
                   <h3>{service.title}</h3>
