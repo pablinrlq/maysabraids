@@ -45,3 +45,6 @@ yarn-error.log*
 
 # configuração local do Claude (preview do servidor de desenvolvimento)
 /.claude/
+
+# typescript
+*.tsbuildinfo

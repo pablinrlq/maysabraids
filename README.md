@@ -32,32 +32,34 @@ Sem `DATABASE_URL`, o modo de desenvolvimento usa um **Postgres local embutido (
 
 > No Windows, mantenha o projeto numa pasta de caminho curto (por exemplo `C:\projetos\maysa`). Caminhos muito longos fazem o Next.js falhar ao gerar os arquivos de build.
 
-## Banco de dados (produção)
+## Banco de dados
 
-1. Crie um projeto no [Neon](https://neon.tech).
-2. Execute, na ordem, no SQL Editor do Neon:
-   - `neon/migrations/001_create_bookings.sql`
-   - `neon/migrations/002_create_availability.sql`
-3. Copie a connection string para `DATABASE_URL`.
+As tabelas são **criadas automaticamente** na primeira requisição (veja `db/schema.ts`). Não é preciso rodar SQL no Neon: basta o site ter a variável `DATABASE_URL`.
 
 ## Variáveis de ambiente
 
 ```env
 ADMIN_PASSWORD=uma-senha-forte
 ADMIN_SESSION_SECRET=um-segredo-longo-e-aleatorio
-DATABASE_URL=postgresql://usuario:senha@host/banco?sslmode=require
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
-NEXT_PUBLIC_WHATSAPP_NUMBER=5531992712047   # opcional
+DATABASE_URL=postgresql://usuario:senha@host/banco?sslmode=require   # a integração Neon da Vercel cria sozinha
+NEXT_PUBLIC_SITE_URL=http://localhost:3000   # opcional
+NEXT_PUBLIC_WHATSAPP_NUMBER=5531992712047    # opcional
 ```
 
 `DATABASE_URL` é exclusivamente de servidor. Nunca use o prefixo `NEXT_PUBLIC_` nela.
 
+Para gerar um `ADMIN_SESSION_SECRET` e já copiá-lo para a área de transferência:
+
+```bash
+node -e "process.stdout.write(require('crypto').randomBytes(32).toString('hex'))" | clip
+```
+
 ## Deploy na Vercel
 
-1. Importe este repositório na Vercel.
-2. Cadastre as variáveis acima em **Settings → Environment Variables**.
-3. Em produção, configure `NEXT_PUBLIC_SITE_URL` com a URL final do site.
-4. Faça o deploy. O painel fica em `/admin`.
+1. Importe este repositório na Vercel (framework detectado: Next.js).
+2. Na aba **Storage** do projeto, crie um banco **Neon** e conecte ao projeto. Isso cria a `DATABASE_URL`.
+3. Em **Settings → Environment Variables**, cadastre `ADMIN_PASSWORD` e `ADMIN_SESSION_SECRET` (Production e Preview).
+4. Faça um novo deploy (variáveis novas só valem depois de um deploy). O painel fica em `/admin`.
 
 ## Onde editar o conteúdo
 
@@ -82,6 +84,6 @@ app/
   api/admin/availability    abrir/fechar dias e horários (admin)
   api/admin/bookings        listar e alterar status (admin)
 db/                         acesso ao banco (Neon, ou PGlite em dev)
-neon/migrations/            SQL das tabelas
+db/schema.ts                tabelas (criadas automaticamente)
 lib/                        serviços, site, regras de datas, auth
 ```

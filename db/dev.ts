@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import type { PGlite } from "@electric-sql/pglite";
 import type { Row } from "./index";
+import { schemaStatements } from "./schema";
 
 // Banco local apenas para desenvolvimento (nunca usado quando DATABASE_URL existe).
 const globalForDb = globalThis as unknown as { __maysaDevDb?: Promise<PGlite> };
@@ -11,9 +12,7 @@ async function open() {
   const dataDir = path.join(process.cwd(), ".data", "dev-db");
   fs.mkdirSync(dataDir, { recursive: true });
   const db = new PGlite(dataDir);
-  const migrationsDir = path.join(process.cwd(), "neon", "migrations");
-  const files = fs.readdirSync(migrationsDir).filter((file) => file.endsWith(".sql")).sort();
-  for (const file of files) await db.exec(fs.readFileSync(path.join(migrationsDir, file), "utf8"));
+  for (const statement of schemaStatements) await db.exec(statement);
   return db;
 }
 
