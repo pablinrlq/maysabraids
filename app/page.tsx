@@ -1,27 +1,49 @@
+import Image, { type StaticImageData } from "next/image";
 import { brl, services } from "../lib/services";
 import { instagramPost, site, whatsappLink } from "../lib/site";
+import WhatsAppIcon from "./components/WhatsAppIcon";
 
-type Work = { n: string; w: number; h: number; alt: string; tag: string; code: string };
+import retrato from "../assets/photos/maysa-retrato.jpg";
+import jornal from "../assets/photos/maysa-jornal.jpg";
+import jumbo from "../assets/photos/maysa-jumbo.jpg";
+import fogo from "../assets/photos/maysa-fogo.jpg";
+import experiencia from "../assets/photos/experiencia.jpg";
+import t01 from "../assets/photos/trabalho-01.jpg";
+import t02 from "../assets/photos/trabalho-02.jpg";
+import t03 from "../assets/photos/trabalho-03.jpg";
+import t04 from "../assets/photos/trabalho-04.jpg";
+import t05 from "../assets/photos/trabalho-05.jpg";
+import t06 from "../assets/photos/trabalho-06.jpg";
+import t07 from "../assets/photos/trabalho-07.jpg";
+import t08 from "../assets/photos/trabalho-08.jpg";
+import t09 from "../assets/photos/trabalho-09.jpg";
+import t10 from "../assets/photos/trabalho-10.jpg";
+import t11 from "../assets/photos/trabalho-11.jpg";
+import t12 from "../assets/photos/trabalho-12.jpg";
+
+type Work = { src: StaticImageData; alt: string; tag: string; code: string };
 
 const gallery: Work[] = [
-  { n: "02", w: 1100, h: 1467, alt: "Tranças longas com cachos french curls, vistas de costas", tag: "French curls", code: "DceHvjOkfph" },
-  { n: "05", w: 1100, h: 1467, alt: "Detalhe de tranças nagô com acabamento limpo", tag: "Tranças nagô", code: "DZptBckkT8O" },
-  { n: "03", w: 1100, h: 1467, alt: "Tranças pretas com cachos soltas nas pontas", tag: "Cachos nas pontas", code: "DceHqWukXpT" },
-  { n: "06", w: 1100, h: 1467, alt: "Coque de cabelo cacheado com tranças nagô na frente", tag: "Coque & nagô", code: "DXuXbERkdvE" },
-  { n: "10", w: 1100, h: 1467, alt: "Trança lateral com fios metálicos e argolas", tag: "Detalhes & acessórios", code: "DV8zwreEU03" },
-  { n: "13", w: 720, h: 720, alt: "Trança com desenho ondulado no topo da cabeça", tag: "Design autoral", code: "C-8oSiwScpA" },
-  { n: "08", w: 1100, h: 1467, alt: "Tranças nagô em leque terminando em rabo de cavalo trançado", tag: "Nagô em leque", code: "DXUVo01EZom" },
-  { n: "07", w: 1100, h: 1375, alt: "Coque cacheado alto com tranças nagô", tag: "Nagô com coque", code: "DEN5QxKSiAp" },
-  { n: "12", w: 1100, h: 1371, alt: "Tranças nagô longas em perfil", tag: "Nagô longas", code: "DCcqh_NSvSM" },
-  { n: "14", w: 1100, h: 1371, alt: "Tranças em espiral vistas de cima", tag: "Espiral", code: "C82OCBHO0KU" },
-  { n: "11", w: 1100, h: 1375, alt: "Trança lateral com fios brancos em cabelo liso", tag: "Lateral com fios", code: "DDyEuoQOK6m" },
-  { n: "15", w: 1100, h: 1459, alt: "Tranças nagô com mechas claras", tag: "Mechas", code: "DceHy5EkTsV" },
+  { src: t01, alt: "Tranças nagô com desenho de coração, mechas loiras e cachos", tag: "Nagô com cachos", code: "DdAUnAwkdjy" },
+  { src: t02, alt: "Tranças longas com cachos loiros, vistas de costas", tag: "Loiro com cachos", code: "DceHc9ckc0I" },
+  { src: t03, alt: "Tranças nagô finas com acabamento ondulado na frente", tag: "Acabamento ondulado", code: "DceHvjOkfph" },
+  { src: t04, alt: "Tranças nagô curvas vistas de lado", tag: "Desenho lateral", code: "DYiJaSrGaBe" },
+  { src: t05, alt: "Tranças nagô com mechas acobreadas", tag: "Mechas", code: "DceHy5EkTsV" },
+  { src: t06, alt: "Tranças longas com cachos pretos, vistas de costas", tag: "Cachos pretos", code: "DceHqWukXpT" },
+  { src: t07, alt: "Coque de cabelo cacheado com tranças nagô na frente", tag: "Nagô com coque", code: "DEN5QxKSiAp" },
+  { src: t08, alt: "Trança lateral com fios metálicos e pingente", tag: "Acessórios", code: "DV8zwreEU03" },
+  { src: t09, alt: "Tranças nagô em leque terminando em rabo trançado", tag: "Nagô em leque", code: "DXUVo01EZom" },
+  { src: t10, alt: "Tranças laterais com fios brancos em cabelo liso", tag: "Lateral com fios", code: "DDyEuoQOK6m" },
+  { src: t11, alt: "Tranças nagô com baby hair, vistas de perfil", tag: "Perfil", code: "DV80T4qEWw5" },
+  { src: t12, alt: "Tranças nagô longas vistas de perfil", tag: "Nagô longas", code: "DCcqh_NSvSM" },
 ];
 
 const groups = [
   { id: "simples", title: "Sem jumbo", text: "Feitas com o seu próprio cabelo." },
   { id: "jumbo", title: "Com jumbo", text: "Com cabelo sintético para volume e comprimento." },
 ] as const;
+
+const marquee = ["TRANÇAS COM IDENTIDADE", "CUIDADO EM CADA DETALHE", "AUTOESTIMA EM PRIMEIRO LUGAR"];
 
 export default function Home() {
   return (
@@ -52,7 +74,9 @@ export default function Home() {
         </div>
 
         <div className="hero-visual">
-          <div className="hero-arch"><img src="/images/work-01.jpg" width={1100} height={1467} alt="Tranças longas com cachos e mechas loiras, feitas pela Maysa" fetchPriority="high" /></div>
+          <div className="hero-arch">
+            <Image src={retrato} alt="Maysa, trancista da Maysa Braids, com tranças longas" priority placeholder="blur" sizes="(max-width: 820px) 88vw, 420px" />
+          </div>
           <div className="signature" aria-hidden="true">M</div>
           <a className="booking-peek" href="/agendamento">
             <span className="booking-icon" aria-hidden="true">✦</span>
@@ -62,7 +86,15 @@ export default function Home() {
         </div>
       </section>
 
-      <div className="marquee" aria-hidden="true"><span>TRANÇAS COM IDENTIDADE</span><i>✦</i><span>CUIDADO EM CADA DETALHE</span><i>✦</i><span>AUTOESTIMA EM PRIMEIRO LUGAR</span></div>
+      <div className="marquee" aria-hidden="true">
+        <div className="marquee-track">
+          {[0, 1].map((copy) => (
+            <div className="marquee-group" key={copy}>
+              {marquee.map((text) => <span key={text}>{text}<i>✦</i></span>)}
+            </div>
+          ))}
+        </div>
+      </div>
 
       <section className="portfolio section" id="portfolio">
         <div className="section-heading">
@@ -71,9 +103,9 @@ export default function Home() {
         </div>
         <div className="gallery">
           {gallery.map((item) => (
-            <a className="gallery-item" href={instagramPost(item.code)} target="_blank" rel="noreferrer" key={item.n}>
+            <a className="gallery-item" href={instagramPost(item.code)} target="_blank" rel="noreferrer" key={item.code}>
               <figure>
-                <img src={`/images/work-${item.n}.jpg`} width={item.w} height={item.h} alt={item.alt} loading="lazy" decoding="async" />
+                <Image src={item.src} alt={item.alt} placeholder="blur" sizes="(max-width: 980px) 50vw, 390px" />
                 <figcaption><span>{item.tag}</span><small>Ver no Instagram <b aria-hidden="true">↗</b></small></figcaption>
               </figure>
             </a>
@@ -87,27 +119,33 @@ export default function Home() {
           <div><p className="eyebrow">Tranças &amp; valores</p><h2>Escolha a sua<br /><em>trança.</em></h2></div>
           <p>Toque na trança para agendar. Se nenhuma for exatamente o que você quer, é só mandar uma foto no WhatsApp que a Maysa te passa o valor.</p>
         </div>
-        <div className="price-grid">
-          {groups.map((group) => (
-            <article className="price-card" key={group.id}>
-              <header><h3>{group.title}</h3><p>{group.text}</p></header>
-              <ul>
-                {services.filter((service) => service.group === group.id).map((service) => (
-                  <li key={service.id}>
-                    <a href={`/agendamento?servico=${service.id}`}>
-                      <span>{service.title}</span><i aria-hidden="true" /><strong>{brl(service.price)}</strong><b aria-hidden="true">→</b>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </article>
-          ))}
+        <div className="price-layout">
+          <figure className="price-photo">
+            <Image src={jumbo} alt="Maysa segurando mechas de jumbo cacheado" placeholder="blur" sizes="(max-width: 980px) 92vw, 330px" />
+            <figcaption>Jumbo é o cabelo sintético que dá volume e comprimento às tranças.</figcaption>
+          </figure>
+          <div className="price-grid">
+            {groups.map((group) => (
+              <article className="price-card" key={group.id}>
+                <header><h3>{group.title}</h3><p>{group.text}</p></header>
+                <ul>
+                  {services.filter((service) => service.group === group.id).map((service) => (
+                    <li key={service.id}>
+                      <a href={`/agendamento?servico=${service.id}`}>
+                        <span>{service.title}</span><i aria-hidden="true" /><strong>{brl(service.price)}</strong><b aria-hidden="true">→</b>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </article>
+            ))}
+          </div>
         </div>
         <p className="price-note">📸 Quer outro modelo? <a href={whatsappLink("Olá, Maysa! Quero fazer uma trança que não está na tabela. Segue a foto de referência:")} target="_blank" rel="noreferrer">Envie uma foto no WhatsApp ↗</a></p>
       </section>
 
       <section className="experience section">
-        <div className="experience-photo"><img src="/images/work-04.jpg" width={1100} height={1467} alt="Tranças nagô com cachos feitas no espaço de atendimento da Maysa" loading="lazy" /><span>Atendimento<br />com hora<br />marcada</span></div>
+        <div className="experience-photo"><Image src={experiencia} alt="Cliente com tranças nagô e cachos no espaço de atendimento da Maysa" placeholder="blur" sizes="(max-width: 820px) 92vw, 560px" /><span>Atendimento<br />com hora<br />marcada</span></div>
         <div className="experience-copy">
           <p className="eyebrow">Como funciona</p>
           <h2>Do clique<br /><em>à cadeira.</em></h2>
@@ -118,7 +156,7 @@ export default function Home() {
 
       <section className="about section" id="sobre">
         <div className="about-copy"><p className="eyebrow">Sobre a trancista</p><h2>Prazer,<br />sou a <em>Maysa.</em></h2><p>Trancista em {site.city}, há 3 anos eu transformo cabelo em autoestima. Cada trança nasce de uma conversa, passa por muito cuidado com o couro cabeludo e termina com a cliente se vendo ainda mais bonita.</p><p>Por trás de cada trança existe dedicação, amor e muito cuidado. Sou apaixonada pelo que faço e por transformar cada detalhe em autoestima.</p><div className="about-stats"><div><strong>3 anos</strong><span>de experiência<br />com tranças</span></div><div><strong>100%</strong><span>atendimento com<br />hora marcada</span></div></div></div>
-        <div className="about-photo"><div className="about-arch"><img src="/images/work-09.jpg" width={1100} height={1459} alt="Cliente de perfil com tranças nagô finalizadas pela Maysa" loading="lazy" /></div><span className="about-mark" aria-hidden="true">MB</span><div className="about-seal"><strong>M</strong><span>MAYSA<br />BRAIDS</span></div></div>
+        <div className="about-photo"><div className="about-arch"><Image src={jornal} alt="Maysa segurando um jornal com a manchete Maysa Braids" placeholder="blur" sizes="(max-width: 520px) 285px, 370px" /></div><span className="about-mark" aria-hidden="true">MB</span><div className="about-seal"><strong>M</strong><span>MAYSA<br />BRAIDS</span></div></div>
       </section>
 
       <section className="faq section">
@@ -132,11 +170,17 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="final-cta"><p className="eyebrow">Seu próximo visual favorito</p><h2>Vamos fazer a sua<br /><em>próxima trança?</em></h2><a className="primary-button" href="/agendamento">Ver horários livres</a><div className="final-script" aria-hidden="true">Maysa</div></section>
+      <section className="final-cta">
+        <Image className="final-bg" src={fogo} alt="" fill placeholder="blur" sizes="100vw" />
+        <p className="eyebrow">Seu próximo visual favorito</p>
+        <h2>Vamos fazer a sua<br /><em>próxima trança?</em></h2>
+        <a className="primary-button" href="/agendamento">Ver horários livres</a>
+        <div className="final-script" aria-hidden="true">Maysa</div>
+      </section>
 
       <footer><a className="brand footer-brand" href="#inicio"><span>Maysa</span><small>Braids · trancista</small></a><div className="footer-links"><a href="#portfolio">Trabalhos</a><a href="#valores">Valores</a><a href="#sobre">Sobre</a><a href="/agendamento">Agendamento</a></div><div className="footer-social"><a href={site.instagramUrl} target="_blank" rel="noreferrer">Instagram ↗</a><a href={whatsappLink()} target="_blank" rel="noreferrer">WhatsApp ↗</a><span>{site.whatsappDisplay}</span></div><p>© {new Date().getFullYear()} Maysa Braids · {site.city}. Todos os direitos reservados.</p></footer>
 
-      <a className="floating-whatsapp" href={whatsappLink()} target="_blank" rel="noreferrer" aria-label="Falar com a Maysa no WhatsApp"><span>↗</span><b>WhatsApp</b></a>
+      <a className="floating-whatsapp" href={whatsappLink()} target="_blank" rel="noreferrer" aria-label="Falar com a Maysa no WhatsApp"><span><WhatsAppIcon /></span><b>WhatsApp</b></a>
     </main>
   );
 }
