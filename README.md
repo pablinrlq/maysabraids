@@ -28,7 +28,7 @@ cp .env.example .env.local   # edite ADMIN_PASSWORD e ADMIN_SESSION_SECRET
 npm run dev
 ```
 
-Sem `DATABASE_URL`, o modo de desenvolvimento usa um **Postgres local embutido (PGlite)** salvo em `.data/`, já com as tabelas criadas. Nada para configurar.
+Sem `DATABASE_URL`, o modo de desenvolvimento usa um **Postgres local embutido (PGlite)** salvo fora do projeto (em `%LOCALAPPDATA%maysa-braidsdev-db` no Windows; troque com `DEV_DB_DIR`), já com as tabelas criadas. Nada para configurar.
 
 > No Windows, mantenha o projeto numa pasta de caminho curto (por exemplo `C:\projetos\maysa`). Caminhos muito longos fazem o Next.js falhar ao gerar os arquivos de build.
 

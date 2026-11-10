@@ -436,25 +436,8 @@ footer > p { grid-column: 1 / -1; margin: 32px 0 0; padding-top: 20px; border-to
 .footer-social span { color: #928580; font-size: 11px; }
 
 /* Tabela de valores */
-.price-grid { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid rgba(255,255,255,.14); border-bottom: 1px solid rgba(255,255,255,.14); }
-.price-card { padding: 40px 40px 34px; }
-.price-card + .price-card { border-left: 1px solid rgba(255,255,255,.14); }
-.price-card header h3 { margin: 0 0 8px; font: 500 34px/1.1 Georgia, serif; }
-.price-card header p { margin: 0 0 28px; color: #b9aaa5; font-size: 14px; line-height: 1.6; }
-.price-card ul { margin: 0; padding: 0; list-style: none; }
-.price-card li a { padding: 19px 0; display: grid; grid-template-columns: auto 1fr auto 18px; gap: 12px; align-items: baseline; border-top: 1px solid rgba(255,255,255,.1); }
-.price-card li a span { font: 500 20px/1.2 Georgia, serif; transition: color .2s ease; }
-.price-card li a i { height: 1px; border-bottom: 1px dotted rgba(255,255,255,.28); transform: translateY(-5px); }
-.price-card li a strong { color: var(--rose-light); font: 500 20px/1.2 Georgia, serif; }
-.price-card li a b { color: var(--rose-light); font-weight: 400; transition: transform .2s ease; }
-.price-card li a:hover span { color: var(--rose-light); }
-.price-card li a:hover b { transform: translateX(5px); }
-.price-note { margin: 36px 0 0; color: #b9aaa5; font-size: 14px; text-align: center; }
-.price-note a { color: var(--rose-light); border-bottom: 1px solid currentColor; }
 
 /* Agendamento */
-.service-group + .service-group { margin-top: 24px; }
-.service-group-title { margin: 0 0 10px; color: #756a66; font-size: 9px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; }
 .service-option em { font: 700 13px/1 Arial, sans-serif; }
 .service-hint { margin: 22px 0 0; color: #7a6e69; font-size: 12px; line-height: 1.65; }
 .service-hint a, .availability-message a { color: var(--wine); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
@@ -549,8 +532,6 @@ footer > p { grid-column: 1 / -1; margin: 32px 0 0; padding-top: 20px; border-to
 }
 
 @media (max-width: 820px) {
-  .price-grid { grid-template-columns: 1fr; }
-  .price-card + .price-card { border-left: 0; border-top: 1px solid rgba(255,255,255,.14); }
 }
 
 @media (max-width: 640px) {
@@ -559,9 +540,6 @@ footer > p { grid-column: 1 / -1; margin: 32px 0 0; padding-top: 20px; border-to
   .gallery-item figcaption { opacity: 1; transform: none; padding: 34px 10px 10px; }
   .gallery-item figcaption span { font-size: 15px; }
   .gallery-item figcaption small { display: none; }
-  .price-card { padding: 30px 2px 26px; }
-  .price-card header h3 { font-size: 30px; }
-  .price-card li a { min-height: 56px; padding: 15px 0; }
   .calendar-day { min-height: 50px; }
   .calendar-day small { font-size: 8px; }
   .admin-tabs { margin: 0 -14px 28px; padding: 0 14px; overflow-x: auto; }
@@ -592,10 +570,6 @@ footer > p { grid-column: 1 / -1; margin: 32px 0 0; padding-top: 20px; border-to
 @keyframes marquee { to { transform: translateX(-50%); } }
 
 /* Valores com a foto da Maysa segurando o jumbo */
-.price-layout { display: grid; grid-template-columns: minmax(0, .7fr) minmax(0, 2fr); align-items: stretch; }
-.price-photo { position: relative; min-height: 440px; margin: 0; overflow: hidden; background: #2a1c15; }
-.price-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 22%; }
-.price-photo figcaption { position: absolute; inset: auto 0 0; padding: 70px 20px 18px; color: #f3e6da; background: linear-gradient(transparent, rgba(20,12,8,.85)); font: italic 15px/1.45 Georgia, serif; }
 
 /* Chamada final com foto de fundo */
 .final-cta .final-bg { object-fit: cover; object-position: center 30%; opacity: .55; }
@@ -606,19 +580,86 @@ footer > p { grid-column: 1 / -1; margin: 32px 0 0; padding-top: 20px; border-to
 .experience-photo img { height: auto; }
 
 @media (max-width: 980px) {
-  .price-layout { grid-template-columns: 1fr; }
-  .price-photo { min-height: 0; aspect-ratio: 4 / 3.3; }
 }
 
 @media (max-width: 640px) {
   .marquee-group { gap: 24px; padding-right: 24px; }
   .marquee i { margin-left: 24px; }
-  .price-photo { aspect-ratio: 4 / 4.4; }
-  .price-photo figcaption { font-size: 14px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .marquee-track { width: auto; animation: none; justify-content: center; }
   .marquee-group + .marquee-group { display: none; }
   .marquee-group { flex-wrap: wrap; justify-content: center; row-gap: 10px; padding: 0 20px; }
+}
+
+/* ===================== Tranças & valores: um cartão com foto por trança ===================== */
+.braid-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+.braid-card { position: relative; display: flex; flex-direction: column; overflow: hidden; color: #f7efe7; background: #241914; border: 1px solid rgba(255,255,255,.08); transition: transform .25s ease, border-color .25s ease; }
+.braid-card:hover { transform: translateY(-3px); border-color: rgba(235,201,168,.45); }
+.braid-photo { position: relative; aspect-ratio: 4 / 5; overflow: hidden; background: #2a1c15; }
+.braid-photo > img:first-child { width: 100%; height: 100%; object-fit: cover; transition: transform .7s cubic-bezier(.2,.7,.2,1); }
+.braid-card:hover .braid-photo > img:first-child { transform: scale(1.04); }
+.braid-extra { position: absolute; right: 10px; bottom: 10px; width: 34%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; border: 3px solid #f6efe6; box-shadow: 0 10px 24px rgba(0,0,0,.35); transform: rotate(4deg); }
+.braid-info { padding: 16px 16px 18px; display: grid; align-content: start; gap: 4px; }
+.braid-info h3 { margin: 0; font: 500 21px/1.15 Georgia, serif; }
+.braid-info small { color: #b9aaa5; font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.braid-info p { margin: 10px 0 0; display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.braid-info strong { color: var(--rose-light); font: 500 20px/1 Georgia, serif; }
+.braid-info p span { color: #d8c8bd; font-size: 11px; font-weight: 700; letter-spacing: .04em; white-space: nowrap; }
+.braid-info p b { display: inline-block; color: var(--rose-light); font-weight: 400; transition: transform .2s ease; }
+.braid-card:hover .braid-info p b { transform: translateX(4px); }
+.braid-custom { justify-content: flex-end; min-height: 280px; }
+.braid-custom > img { object-fit: cover; object-position: center 25%; opacity: .55; }
+.braid-custom::before { content: ""; position: absolute; inset: 0; z-index: 1; background: linear-gradient(180deg, rgba(27,19,15,.1), rgba(27,19,15,.92) 72%); }
+.braid-custom > div { position: relative; z-index: 2; padding: 22px 18px; display: grid; gap: 8px; }
+.braid-custom small { color: var(--rose-light); font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+.braid-custom strong { font: 500 24px/1.12 Georgia, serif; }
+.braid-custom span { color: #d8c8bd; font-size: 12px; }
+
+@media (max-width: 980px) {
+  .braid-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+}
+
+@media (max-width: 640px) {
+  .braid-grid { gap: 10px; }
+  .braid-info { padding: 12px 12px 14px; }
+  .braid-info h3 { font-size: 17px; }
+  .braid-info strong { font-size: 16px; }
+  .braid-info p { margin-top: 8px; flex-direction: column; align-items: flex-start; gap: 6px; }
+  .braid-extra { right: 7px; bottom: 7px; width: 38%; border-width: 2px; }
+  .braid-custom { min-height: 0; }
+  .braid-custom > div { padding: 16px 13px; }
+  .braid-custom strong { font-size: 19px; }
+}
+
+/* ===================== Agendamento: tranças com foto, WhatsApp e confirmação ===================== */
+.service-option { flex-direction: row; align-items: center; justify-content: flex-start; gap: 12px; padding: 10px 12px; }
+.service-option > span { min-width: 0; display: grid; gap: 4px; }
+.service-option small { color: #8a7d77; font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.service-thumb { flex: 0 0 52px; width: 52px; height: 65px; object-fit: cover; border-radius: 4px; }
+.field-hint { margin-top: 7px; display: block; color: #9e3c4b; font-size: 11px; font-style: normal; }
+.text-field input[aria-invalid="true"] { border-color: #c98a93; }
+.phone-link { color: var(--wine); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+
+.booking-done { max-width: 620px; margin: 0 auto; padding: 46px 42px 40px; color: var(--ink); background: white; box-shadow: 0 28px 70px rgba(30,15,8,.26); text-align: center; }
+.booking-done .done-icon { width: 58px; height: 58px; margin: 0 auto 18px; display: grid; place-items: center; border-radius: 50%; color: white; background: #4f8f6a; font-size: 26px; }
+.booking-done .summary-kicker { color: var(--rose); }
+.booking-done h3 { margin: 0 0 14px; font: 500 38px/1.05 Georgia, serif; letter-spacing: -.03em; }
+.booking-done h3 em { color: var(--rose); font-weight: 400; }
+.booking-done > p { margin: 0 auto 24px; max-width: 470px; color: #6f635e; font-size: 15px; line-height: 1.65; }
+.booking-done .summary-list { text-align: left; border-top-color: var(--line); }
+.booking-done .summary-list div { border-bottom-color: var(--line); }
+.booking-done .summary-list span { color: #8a7d77; }
+.done-actions { margin-top: 28px; display: grid; gap: 12px; justify-items: center; }
+.done-actions .whatsapp-button { max-width: 360px; display: block; color: white; background: #25a35a; text-decoration: none; }
+.done-actions .whatsapp-button:hover { background: #1f8f4e; }
+.done-back { color: var(--wine); font-size: 13px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+
+@media (max-width: 640px) {
+  .service-option { gap: 9px; padding: 8px; }
+  .service-thumb { flex-basis: 42px; width: 42px; height: 53px; }
+  .service-option strong { font-size: 14px; }
+  .booking-done { padding: 34px 20px 30px; }
+  .booking-done h3 { font-size: 32px; }
 }

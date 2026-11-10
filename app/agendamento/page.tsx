@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import BookingForm from "../BookingForm";
+import { ownerNotifyConfigured } from "../../lib/notify";
 
 export const metadata: Metadata = {
   title: "Agendar horário | Maysa Braids",
@@ -33,7 +34,7 @@ export default async function BookingPage({ searchParams }: { searchParams: Prom
           <h1>Reserve o<br /><em>seu horário.</em></h1>
           <p>Escolha a trança, um dia com horários livres e o melhor horário para você. Ao finalizar, o pedido segue para o WhatsApp da Maysa.</p>
         </div>
-        <BookingForm initialServiceId={servico} />
+        <BookingForm initialServiceId={servico} autoNotify={ownerNotifyConfigured()} />
       </section>
     </main>
   );

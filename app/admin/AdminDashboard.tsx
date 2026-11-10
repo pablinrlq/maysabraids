@@ -4,10 +4,12 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AvailabilityManager from "./AvailabilityManager";
 import { UnauthorizedError, adminFetch } from "./api";
+import { formatBrPhone } from "../../lib/phone";
 
 type Booking = {
   id: number;
   name: string;
+  phone: string;
   serviceId: string;
   serviceTitle: string;
   date: string;
@@ -162,11 +164,12 @@ export default function AdminDashboard() {
             {error && <div className="admin-error" role="alert">{error}</div>}
             <div className="booking-table-wrap">
               <table className="booking-table">
-                <thead><tr><th>Cliente</th><th>Trança</th><th>Data</th><th>Horário</th><th>Observação</th><th>Status</th></tr></thead>
+                <thead><tr><th>Cliente</th><th>WhatsApp</th><th>Trança</th><th>Data</th><th>Horário</th><th>Observação</th><th>Status</th></tr></thead>
                 <tbody>
                   {visibleBookings.map((booking) => (
                     <tr key={booking.id}>
                       <td data-label="Cliente"><strong>{booking.name}</strong><small>Pedido #{booking.id}</small></td>
+                      <td data-label="WhatsApp">{booking.phone ? <a className="phone-link" href={`https://wa.me/${booking.phone}`} target="_blank" rel="noreferrer">{formatBrPhone(booking.phone)}</a> : "—"}</td>
                       <td data-label="Trança">{booking.serviceTitle}</td>
                       <td data-label="Data">{new Date(`${booking.date}T12:00:00`).toLocaleDateString("pt-BR")}</td>
                       <td data-label="Horário"><strong>{booking.time}</strong></td>

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Calendar, { toDateString } from "../components/Calendar";
+import { formatBrPhone } from "../../lib/phone";
 import { addDays, sortTimes } from "../../lib/slots";
 import { UnauthorizedError, adminFetch } from "./api";
 
@@ -10,6 +11,7 @@ type Slot = {
   time: string;
   bookingId: number | null;
   clientName: string | null;
+  clientPhone: string | null;
   serviceTitle: string | null;
   status: string | null;
 };
@@ -236,7 +238,13 @@ export default function AvailabilityManager({ onUnauthorized }: { onUnauthorized
                     <li className={slot.bookingId ? "slot booked" : "slot free"} key={slot.time}>
                       <strong>{slot.time}</strong>
                       {slot.bookingId ? (
-                        <span>Reservado · {slot.clientName}<small>{slot.serviceTitle}</small></span>
+                        <span>
+                          Reservado · {slot.clientName}
+                          <small>
+                            {slot.serviceTitle}
+                            {slot.clientPhone && <> · <a className="phone-link" href={`https://wa.me/${slot.clientPhone}`} target="_blank" rel="noreferrer">{formatBrPhone(slot.clientPhone)}</a></>}
+                          </small>
+                        </span>
                       ) : (
                         <span>Livre</span>
                       )}
