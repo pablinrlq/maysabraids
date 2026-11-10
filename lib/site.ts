@@ -10,9 +10,10 @@ export const site = {
   timezone: "America/Sao_Paulo",
 } as const;
 
+// Usa api.whatsapp.com direto: o redirecionamento do wa.me troca emojis por "�".
 export function whatsappLink(message?: string) {
-  const base = `https://wa.me/${site.whatsappNumber}`;
-  return message ? `${base}?text=${encodeURIComponent(message)}` : base;
+  const base = `https://api.whatsapp.com/send?phone=${site.whatsappNumber}`;
+  return message ? `${base}&text=${encodeURIComponent(message)}` : base;
 }
 
 export function instagramPost(code: string) {

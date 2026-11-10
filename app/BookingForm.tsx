@@ -115,8 +115,7 @@ export default function BookingForm({ initialServiceId, autoNotify }: Props) {
   );
 
   const clientMessage = [
-    // Sem emojis: o WhatsApp para computador quebra alguns emojis vindos de links wa.me (aparece "�").
-    `Olá, ${site.owner}! ${done ? "Acabei de agendar pelo site." : "Gostaria de agendar um horário."}`,
+    `Olá, ${site.owner}! ✨ ${done ? "Acabei de agendar pelo site." : "Gostaria de agendar um horário."}`,
     "",
     `Nome: ${name.trim()}`,
     `Trança: ${selectedService.title}${selectedJumbo ? ` (${selectedJumbo.toLowerCase()})` : ""} — ${priceLabel(selectedService)}`,
