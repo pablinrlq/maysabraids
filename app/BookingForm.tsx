@@ -115,16 +115,17 @@ export default function BookingForm({ initialServiceId, autoNotify }: Props) {
   );
 
   const clientMessage = [
-    `Olá, ${site.owner}! ✨ ${done ? "Acabei de agendar pelo site." : "Gostaria de agendar um horário."}`,
+    // Sem emojis: o WhatsApp para computador quebra alguns emojis vindos de links wa.me (aparece "�").
+    `Olá, ${site.owner}! ${done ? "Acabei de agendar pelo site." : "Gostaria de agendar um horário."}`,
     "",
     `Nome: ${name.trim()}`,
     `Trança: ${selectedService.title}${selectedJumbo ? ` (${selectedJumbo.toLowerCase()})` : ""} — ${priceLabel(selectedService)}`,
     `Data: ${formattedDate} (${weekday})`,
     `Horário: ${time}`,
-    note.trim() ? `Observação: ${note.trim()}` : "",
+    note.trim() ? `Observação: ${note.trim()}` : null,
     "",
     done ? "Fico no aguardo da confirmação!" : "Pode confirmar para mim?",
-  ].filter(Boolean).join("\n");
+  ].filter((line) => line !== null).join("\n");
 
   async function sendRequest() {
     if (!ready || !phoneDigits) return;
